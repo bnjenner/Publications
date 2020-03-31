@@ -1,9 +1,5 @@
-# annotation for TAGseq Experiment
-#
-######################################################################
-#
-# assigns 3' UTR's of a given length to reads
-#
+#!/usr/bin/env python3
+
 ######################################################################
 
 import os
@@ -30,11 +26,7 @@ class annApp():
 					data.insert(0,'0\t1\t2\t3\t4\t5\t6\t7\t\"dumby\"; Parent= \"dumby\"\n')  #  dumby line (this program was tricky just live with it)
 					file.close()
 
-				# sample line of gtf file
-
-				#fo_apii_R3_nrrl38295_contig_1	CodingQuarry_v2.0	CDS	29841	30254	.	-	0	transcript_id "PGN.00001"; Parent= "PGN.00001";
-				#		0							1				2		3		4	5	6	7							8		
-
+					
 				bp_to_add = int(Length)
 				
 				x = 1
@@ -92,7 +84,7 @@ def parseArgs():
 	#
 	# Required and Optional Arguments 
 	#
-	parser = argparse.ArgumentParser('annotation', description='assigns 3\' UTRs of a specified length to reads', add_help=True,
+	parser = argparse.ArgumentParser('annotation', description='assigns 3\' UTRs of a specified length to reads in gtf files', add_help=True,
 		epilog='For questions or comments, contact Bradley Jenner <bnjenner@ucdavis.edu>')
 	parser.add_argument('-g', help='directory where unedited gtf files are located', dest='Files', type=str)
 	parser.add_argument('-l', help='desired length of UTR', dest='Length', type=str)
@@ -105,10 +97,8 @@ def execute(args):
 	app = annApp()
 	return app.start(args.Files, args.Length)
 
+
 def main():
-	"""
-	main function
-	""" 
 	args = parseArgs()
 	execute(args)
 	
