@@ -1,3 +1,3 @@
 # Global Fof
 
-(short description coming soon...)
+short description coming soon...
