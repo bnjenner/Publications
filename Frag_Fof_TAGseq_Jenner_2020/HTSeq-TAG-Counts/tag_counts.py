@@ -37,7 +37,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             supplementary_alignment_mode,
                             feature_type, id_attribute,
                             additional_attributes,
-                            quiet, minaqual, samouts, countouts,
+                            quiet, minaqual, samouts,
                             utr_tag):
 
     def write_to_samout(r, assignment, samoutfile):
@@ -50,8 +50,6 @@ def count_reads_in_features(sam_filenames, gff_filename,
                 read.optional_fields.append(('XF', assignment))
                 samoutfile.write(read.get_sam_line() + "\n")
 
-    if countouts == '':
-        raise ValueError("Name for counts file not specified.")
 
     if samtype == "sam":
         SAM_or_BAM_Reader = HTSeq.SAM_Reader
@@ -102,6 +100,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
                             "Feature %s at %s does not have strand information but you are "
                             "running htseq-count in stranded mode. Use '--stranded=no'." %
                             (f.name, f.iv))
+                
                 if f.type in tags:
                     features[f.iv] += f.attr[id_attribute] + '^' + 'UTR' # in features dictionary, which contains intervals for each region, each entry is tagged with their featuretype separated by a unique character
                 else:
@@ -308,7 +307,7 @@ def count_reads_in_features(sam_filenames, gff_filename,
                         write_to_samout(r, "__no_feature", samoutfile)
                         empty += 1
 
-                    elif len(fs) > 3:
+                    elif len(fs) >= 3:
                         write_to_samout(r, "__ambiguous[" + '+'.join(fs) + "]",
                                         samoutfile)
                         ambiguous += 1
@@ -338,10 +337,10 @@ def count_reads_in_features(sam_filenames, gff_filename,
                                         samoutfile)
                                     ambiguous += 1
 
-                            else:  #  read overlaps with more than one count
-                                write_to_samout(r, "__ambiguous[" + '+'.join(fs) + "]",
-                                    samoutfile)
-                                ambiguous += 1
+                            # else:  #  read overlaps with more than one count
+                            #     write_to_samout(r, "__ambiguous[" + '+'.join(fs) + "]",
+                            #         samoutfile)
+                            #     ambiguous += 1
 
                         elif multimapped_mode == 'all':
                             for fsi in list(fs):
@@ -380,10 +379,8 @@ def count_reads_in_features(sam_filenames, gff_filename,
 
     pad = ['' for attr in additional_attributes]
 
-    with open(countouts, 'w') as final_counts:
-        for fn in sorted(counts.keys()):
-            final_counts.write(str('\t'.join([fn] + attributes[fn] + [str(c[fn]) for c in counts_all]) + '\n'))
-            print('\t'.join([fn] + attributes[fn] + [str(c[fn]) for c in counts_all]))
+    for fn in sorted(counts.keys()):
+        print('\t'.join([fn] + attributes[fn] + [str(c[fn]) for c in counts_all]))
             
     print('\t'.join(["__no_feature"] + pad + [str(c) for c in empty_all]))
     print('\t'.join(["__ambiguous"] + pad + [str(c) for c in ambiguous_all]))
@@ -508,9 +505,6 @@ def main():
             "SAM files (one per input file needed), annotating each line " +
             "with its feature assignment (as an optional field with tag 'XF')")
 
-    pa.add_argument(
-            "-c", "--countout", type=str, dest="countouts", default='',
-            help="Write out all counts to counts file.")
 
     pa.add_argument(
             "-u", "--utr-tag", type=str, dest="utr_tag", default='UTR',
@@ -549,7 +543,6 @@ def main():
                 args.quiet,
                 args.minaqual,
                 args.samouts,
-                args.countouts,
                 args.utr_tag)
     except:
         sys.stderr.write("  %s\n" % str(sys.exc_info()[1]))
